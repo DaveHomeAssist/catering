@@ -1,14 +1,15 @@
-const CACHE_NAME = 'act-two-catering-v2';
+const CACHE_NAME = 'act-two-catering-v3';
 
 const PRECACHE_URLS = [
   '/',
   '/index.html',
   '/app.js',
   '/manifest.json',
-  '/icons/icon-192x192.png',
-  '/icons/icon-512x512.png',
-  '/icons/apple-touch-icon.png',
-  '/icons/favicon.png',
+  '/assets/icons/favicon/favicon.svg',
+  '/assets/icons/favicon/icon-192x192.png',
+  '/assets/icons/favicon/icon-512x512.png',
+  '/assets/icons/favicon/apple-touch-icon.png',
+  '/assets/icons/favicon/favicon.png',
   '/images/hero-home.jpg',
 ];
 

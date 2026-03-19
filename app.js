@@ -1385,6 +1385,9 @@ function QuoteForm({
 }) {
   const [step, setStep] = useState(1);
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
+  const [formErrors, setFormErrors] = useState({});
   const [form, setForm] = useState({
     service: preselectedService || "",
     guests: "",
@@ -1396,12 +1399,52 @@ function QuoteForm({
     details: ""
   });
   const totalSteps = 3;
-  const set = (k, v) => setForm(prev => ({
-    ...prev,
-    [k]: v
-  }));
+  const set = (k, v) => {
+    setForm(prev => ({ ...prev, [k]: v }));
+    setFormErrors(prev => { const next = { ...prev }; delete next[k]; return next; });
+  };
+  const validateStep = (s) => {
+    const errs = {};
+    if (s === 1) {
+      if (!form.service) errs.service = "Select an event type";
+    }
+    if (s === 2) {
+      if (!form.name.trim()) errs.name = "Name is required";
+      if (!form.phone.trim()) errs.phone = "Phone is required";
+      if (!form.email.trim()) errs.email = "Email is required";
+      else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) errs.email = "Enter a valid email";
+    }
+    return errs;
+  };
+  const advanceStep = () => {
+    const errs = validateStep(step);
+    if (Object.keys(errs).length > 0) { setFormErrors(errs); return; }
+    setFormErrors({});
+    setStep(s => s + 1);
+  };
+  const handleSubmit = () => {
+    const step1 = validateStep(1);
+    const step2 = validateStep(2);
+    const allErrs = { ...step1, ...step2 };
+    if (Object.keys(allErrs).length > 0) { setFormErrors(allErrs); return; }
+    setSubmitting(true);
+    setSubmitError("");
+    fetch("/.netlify/functions/quote", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(form)
+    }).then(res => {
+      if (!res.ok) throw new Error("Submission failed");
+      setSubmitted(true);
+    }).catch(() => {
+      setSubmitError("Something went wrong. Please call us directly.");
+      setSubmitting(false);
+    });
+  };
   if (submitted) return /*#__PURE__*/React.createElement("div", {
-    className: "quote-form-container"
+    className: "quote-form-container",
+    role: "status",
+    "aria-live": "polite"
   }, /*#__PURE__*/React.createElement("div", {
     className: "form-success"
   }, /*#__PURE__*/React.createElement("div", {
@@ -1545,14 +1588,25 @@ function QuoteForm({
     className: "form-actions"
   }, step > 1 && /*#__PURE__*/React.createElement("button", {
     className: "form-btn-back",
-    onClick: () => setStep(s => s - 1)
+    onClick: () => setStep(s => s - 1),
+    disabled: submitting
   }, "\u2190 Back"), step < totalSteps && /*#__PURE__*/React.createElement("button", {
     className: "form-btn-next",
-    onClick: () => setStep(s => s + 1)
+    onClick: advanceStep
   }, "Continue \u2192"), step === totalSteps && /*#__PURE__*/React.createElement("button", {
     className: "form-btn-next",
-    onClick: () => setSubmitted(true)
-  }, "Submit Request"))));
+    onClick: handleSubmit,
+    disabled: submitting
+  }, submitting ? "Sending\u2026" : "Submit Request"), submitError && /*#__PURE__*/React.createElement("div", {
+    style: { color: "var(--error, #c44)", fontSize: 14, marginTop: 8, textAlign: "center" },
+    role: "alert"
+  }, submitError)), Object.keys(formErrors).length > 0 && /*#__PURE__*/React.createElement("div", {
+    style: { padding: "8px 12px", background: "rgba(196,68,68,.08)", borderRadius: 8, marginTop: 8 },
+    role: "alert"
+  }, Object.values(formErrors).map((msg, i) => /*#__PURE__*/React.createElement("div", {
+    key: i,
+    style: { color: "var(--error, #c44)", fontSize: 13, lineHeight: 1.5 }
+  }, "\u26A0 ", msg)))));
 }
 
 // ═══════════════════════════════════════════════════════════════
