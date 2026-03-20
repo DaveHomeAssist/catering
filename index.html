@@ -38,6 +38,8 @@
       text-decoration: none;
     }
     .skip-link:focus { left: 10px; top: 10px; }
+    #root { max-width: 720px; margin: 0 auto; padding: 16px; }
+    @media (max-width: 768px) { #root { padding: 12px; } }
     .fallback-header {
       display: grid;
       gap: 10px;
@@ -80,7 +82,27 @@
   </header>
   <main class="fallback-shell">
     <div id="loading"><div id="loading-spinner"></div><div id="loading-text">Loading...</div></div>
-    <div id="root"></div>
+    <div id="root">
+      <noscript>
+        <div style="padding:2rem 0;color:#f5f0eb;line-height:1.7;">
+          <h2 style="font-size:1.4rem;margin-bottom:.5rem;color:#f5d27a;">Premium Comfort Catering</h2>
+          <p style="color:rgba(245,240,235,0.74);margin-bottom:1rem;">From family recipe to your table — Act Two Catering provides premium comfort catering rooted in tradition. Based in Collingswood, NJ, we serve weddings, corporate events, private parties, and more.</p>
+          <h3 style="font-size:1.1rem;margin-bottom:.4rem;">Services</h3>
+          <ul style="list-style:disc;padding-left:1.5rem;color:rgba(245,240,235,0.74);margin-bottom:1rem;">
+            <li>Wedding Catering</li>
+            <li>Corporate Events</li>
+            <li>Private Parties &amp; Gatherings</li>
+          </ul>
+          <h3 style="font-size:1.1rem;margin-bottom:.4rem;">Contact Us</h3>
+          <p style="color:rgba(245,240,235,0.74);">
+            Phone: <a href="tel:+12676653324" style="color:#f5d27a;">(267) 665-3324</a><br>
+            Email: <a href="mailto:hello@acttwocatering.com" style="color:#f5d27a;">hello@acttwocatering.com</a><br>
+            Location: Collingswood, NJ 08108
+          </p>
+          <p style="color:rgba(245,240,235,0.5);font-size:.85rem;margin-top:1rem;">Enable JavaScript for the full interactive experience including menus, booking, and budget estimation.</p>
+        </div>
+      </noscript>
+    </div>
   </main>
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
