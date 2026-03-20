@@ -12,9 +12,13 @@
   <link rel="icon" href="assets/icons/favicon/favicon.png" type="image/png">
   <link rel="apple-touch-icon" sizes="180x180" href="assets/icons/favicon/apple-touch-icon.png">
   <style>
+    :root {
+      --bg-dark: #1E1610;
+      --accent: #f5d27a;
+    }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: system-ui, sans-serif; }
-    #loading { position: fixed; inset: 0; z-index: 9999; background: #1E1610;
+    #loading { position: fixed; inset: 0; z-index: 9999; background: var(--bg-dark);
       display: flex; align-items: center; justify-content: center; flex-direction: column;
       transition: opacity 0.4s ease; }
     #loading.hide { opacity: 0; pointer-events: none; }
@@ -23,7 +27,7 @@
     @keyframes spin { to { transform: rotate(360deg); } }
     #loading-text { color: rgba(255,255,255,0.6); font-size: 13px; margin-top: 14px; }
     a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
-      outline: 2px solid #f5d27a;
+      outline: 2px solid var(--accent);
       outline-offset: 3px;
     }
   </style>
