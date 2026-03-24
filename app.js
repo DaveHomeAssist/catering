@@ -1081,6 +1081,98 @@ body {
 .tag { font-size: 11px; padding: 4px 10px; border-radius: 4px; background: var(--parchment); color: var(--wine-deep); font-weight: 500; border: 1px solid var(--cream-dark); }
 .link-btn { background: none; border: none; color: var(--wine); font-weight: 600; cursor: pointer; font-family: var(--font-body); font-size: 14px; text-decoration: underline; text-underline-offset: 3px; padding: 0; }
 .link-btn:hover { color: var(--wine-light); }
+
+/* ── MOBILE RESPONSIVE FIXES ── */
+
+/* Tablet / small laptop */
+@media (max-width: 768px) {
+  .section { padding: 56px 20px; }
+  .hero { padding: 64px 20px 56px; }
+  .hero.has-bg-image { padding: 80px 20px 72px; }
+  .trust-bar { gap: 20px; padding: 28px 20px; }
+  .stats-strip { gap: 28px; }
+  .inline-cta { padding: 32px 24px; }
+  .inline-cta h3 { font-size: 24px; }
+  .signature-banner { padding: 28px; gap: 24px; }
+  .signature-banner-emoji { font-size: 44px; }
+  .budget-calc { padding: 24px; }
+  .event-header { padding: 22px; gap: 12px; }
+  .event-emoji { font-size: 36px; }
+}
+
+/* Phone */
+@media (max-width: 480px) {
+  .section { padding: 40px 16px; }
+  .hero { padding: 48px 16px 40px; }
+  .hero.has-bg-image { padding: 64px 16px 56px; }
+  .hero p { font-size: 15px; margin-bottom: 28px; }
+  .hero-reassurance { gap: 16px; margin-top: 24px; padding-top: 20px; }
+  .hero-reassurance span { font-size: 12px; }
+
+  .header-main { height: 56px; padding: 0 16px; }
+  .header-utility { font-size: 10.5px; padding: 5px 0; }
+
+  .trust-bar { gap: 14px; padding: 24px 16px; }
+  .trust-badge { font-size: 12px; gap: 8px; }
+  .trust-badge-icon { font-size: 18px; }
+
+  .service-grid { gap: 14px; }
+  .menu-grid { gap: 14px; }
+  .event-grid { gap: 16px; }
+  .card-body { padding: 22px; }
+  .service-card .card-body { padding: 24px; }
+  .menu-card .card-body { padding: 18px 20px; }
+
+  .form-step-header { padding: 24px 20px 0; }
+  .form-body { padding: 20px 20px 24px; }
+  .form-step-title { font-size: 20px; }
+  .form-success { padding: 36px 20px; }
+  .form-success h3 { font-size: 24px; }
+  .form-btn-back { padding: 14px 24px; }
+  .form-btn-next { padding: 14px 28px; }
+
+  .process-step { gap: 14px; padding: 20px 0; }
+  .step-num { width: 36px; height: 36px; font-size: 13px; }
+  .step-content h4 { font-size: 16px; }
+
+  .inline-cta { padding: 28px 20px; }
+  .inline-cta h3 { font-size: 22px; }
+  .inline-cta p { font-size: 14px; }
+
+  .stats-strip { gap: 20px; }
+  .stat-num { font-size: 30px; }
+
+  .filter-bar { gap: 6px; }
+  .filter-chip { padding: 6px 14px; font-size: 12px; }
+
+  .signature-banner { padding: 24px; gap: 20px; }
+  .signature-banner-emoji { font-size: 40px; }
+  .signature-banner h3 { font-size: 20px; }
+
+  .budget-calc { padding: 20px; }
+  .budget-range { font-size: 30px; }
+
+  .project-facts { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+
+  .site-footer { padding: 48px 16px 24px; }
+  .footer-inner { gap: 24px; }
+  .footer-brand h3 { font-size: 20px; }
+}
+
+/* Small phone */
+@media (max-width: 360px) {
+  .section { padding: 36px 14px; }
+  .hero { padding: 40px 14px 36px; }
+  .hero.has-bg-image { padding: 56px 14px 48px; }
+  .header-main { padding: 0 12px; }
+  .form-step-header { padding: 20px 16px 0; }
+  .form-body { padding: 16px 16px 20px; }
+  .form-step-title { font-size: 18px; }
+  .inline-cta { padding: 24px 16px; }
+  .signature-banner { padding: 20px; }
+  .trust-bar { gap: 12px; padding: 20px 14px; }
+  .event-header { padding: 18px; }
+}
 `;
 
 // ═══════════════════════════════════════════════════════════════
