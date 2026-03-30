@@ -133,26 +133,34 @@ const SERVICES = [
 ];
 
 // ── IMAGE CONFIGURATION ──
+// Resolve image URLs against the current app base so they work locally and on GitHub Pages.
+const assetPath = (relativePath) => {
+  const cleanPath = relativePath.replace(/^\/+/, "");
+  const pathname = window.location.pathname || "/";
+  const basePath = pathname.endsWith("/") ? pathname : pathname.replace(/[^/]*$/, "");
+  return `${basePath}${cleanPath}`;
+};
+
 // To replace placeholders: drop your photos in /images/ and update the paths below.
 // Recommended sizes: menu items 600x400, hero images 1920x800, about photos 800x600
 const IMAGES = {
   // Hero background images (one per page — dark, moody food/event photography works best)
   hero: {
-    home: "/images/hero-home.jpg",           // Signature croquettes plated beautifully
-    menu: "/images/hero-menu.jpg",           // Overhead spread of dishes
-    services: "/images/hero-services.jpg",   // Elegant event table setting
-    events: "/images/hero-events.jpg",       // Candid shot from a catered event
-    reviews: "/images/hero-reviews.jpg",     // Happy guests at a table
-    pricing: "/images/hero-pricing.jpg",     // Close-up of plated food
-    about: "/images/hero-about.jpg",         // Family/team in kitchen or at event
-    contact: "/images/hero-contact.jpg",     // Warm, inviting table setup
-    areas: "/images/hero-areas.jpg",         // Philadelphia/SJ skyline or venue exterior
+    home: assetPath("images/hero-home.jpg"),           // Signature croquettes plated beautifully
+    menu: assetPath("images/hero-menu.jpg"),           // Overhead spread of dishes
+    services: assetPath("images/hero-services.jpg"),   // Elegant event table setting
+    events: assetPath("images/hero-events.jpg"),       // Candid shot from a catered event
+    reviews: assetPath("images/hero-reviews.jpg"),     // Happy guests at a table
+    pricing: assetPath("images/hero-pricing.jpg"),     // Close-up of plated food
+    about: assetPath("images/hero-about.jpg"),         // Family/team in kitchen or at event
+    contact: assetPath("images/hero-contact.jpg"),     // Warm, inviting table setup
+    areas: assetPath("images/hero-areas.jpg"),         // Philadelphia/SJ skyline or venue exterior
   },
   // About page photos
   about: {
-    family: "/images/about-family.jpg",      // Family photo or candid cooking shot
-    kitchen: "/images/about-kitchen.jpg",    // Kitchen prep / behind the scenes
-    team: "/images/about-team.jpg",          // Team at an event
+    family: assetPath("images/about-family.jpg"),      // Family photo or candid cooking shot
+    kitchen: assetPath("images/about-kitchen.jpg"),    // Kitchen prep / behind the scenes
+    team: assetPath("images/about-team.jpg"),          // Team at an event
   },
   // Placeholder fallback (generated gradient when image fails to load)
   placeholder: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='400'%3E%3Crect fill='%23F0EBE1' width='600' height='400'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Georgia' font-size='18' fill='%23B8B4AC'%3EPhoto Coming Soon%3C/text%3E%3C/svg%3E",
@@ -163,67 +171,67 @@ const MENU_ITEMS = [
     id: "croquettes-classic", category: "signature", name: "Classic Turkey Croquettes",
     desc: "Our flagship — crispy golden exterior, creamy seasoned turkey filling. The dish that started it all.",
     tags: ["Signature", "GF Option"], featured: true, icon: "🥇",
-    img: "/images/menu-croquettes-classic.jpg",
+    img: assetPath("images/menu-croquettes-classic.jpg"),
   },
   {
     id: "croquettes-herb", category: "signature", name: "Garden Herb Croquettes",
     desc: "Fresh rosemary, thyme, and sage folded into our turkey base. A nod to Sunday dinner.",
     tags: ["Signature", "Seasonal"], featured: true, icon: "🌿",
-    img: "/images/menu-croquettes-herb.jpg",
+    img: assetPath("images/menu-croquettes-herb.jpg"),
   },
   {
     id: "croquettes-spicy", category: "signature", name: "Smoky Chipotle Croquettes",
     desc: "Slow-smoked chipotle and roasted pepper give these a warm, lingering kick.",
     tags: ["Signature", "Spicy"], featured: true, icon: "🌶️",
-    img: "/images/menu-croquettes-spicy.jpg",
+    img: assetPath("images/menu-croquettes-spicy.jpg"),
   },
   {
     id: "croquettes-truffle", category: "signature", name: "Black Truffle Croquettes",
     desc: "Elevated with black truffle and aged parmesan — our premium offering for special occasions.",
     tags: ["Premium", "Signature"], featured: true, icon: "🖤",
-    img: "/images/menu-croquettes-truffle.jpg",
+    img: assetPath("images/menu-croquettes-truffle.jpg"),
   },
   {
     id: "mac-cheese", category: "sides", name: "Three-Cheese Baked Mac",
     desc: "Sharp cheddar, gruyère, and fontina with a golden breadcrumb crust.",
     tags: ["Comfort Classic", "Vegetarian"], featured: false, icon: "🧀",
-    img: "/images/menu-mac-cheese.jpg",
+    img: assetPath("images/menu-mac-cheese.jpg"),
   },
   {
     id: "collard-greens", category: "sides", name: "Braised Collard Greens",
     desc: "Slow-cooked with smoked turkey and a touch of apple cider vinegar.",
     tags: ["Southern", "GF"], featured: false, icon: "🥬",
-    img: "/images/menu-collard-greens.jpg",
+    img: assetPath("images/menu-collard-greens.jpg"),
   },
   {
     id: "sweet-potato", category: "sides", name: "Whipped Sweet Potato",
     desc: "Brown butter, warm spices, and a maple pecan crumble.",
     tags: ["Seasonal", "GF"], featured: false, icon: "🍠",
-    img: "/images/menu-sweet-potato.jpg",
+    img: assetPath("images/menu-sweet-potato.jpg"),
   },
   {
     id: "cornbread", category: "sides", name: "Honey Jalapeño Cornbread",
     desc: "Sweet heat in every bite — baked fresh and served warm.",
     tags: ["House Made"], featured: false, icon: "🌽",
-    img: "/images/menu-cornbread.jpg",
+    img: assetPath("images/menu-cornbread.jpg"),
   },
   {
     id: "slaw", category: "sides", name: "Citrus Herb Slaw",
     desc: "Bright, crunchy, and refreshing — the perfect counterpoint to rich comfort food.",
     tags: ["Fresh", "Vegan", "GF"], featured: false, icon: "🥗",
-    img: "/images/menu-citrus-slaw.jpg",
+    img: assetPath("images/menu-citrus-slaw.jpg"),
   },
   {
     id: "dipping-trio", category: "extras", name: "Dipping Sauce Trio",
     desc: "House-made cranberry mostarda, garlic aioli, and honey mustard.",
     tags: ["House Made"], featured: false, icon: "🫙",
-    img: "/images/menu-dipping-trio.jpg",
+    img: assetPath("images/menu-dipping-trio.jpg"),
   },
   {
     id: "dessert-bites", category: "extras", name: "Mini Dessert Bites",
     desc: "Rotating selection — pecan tarts, lemon bars, and chocolate truffles.",
     tags: ["Dessert", "Seasonal"], featured: false, icon: "🍫",
-    img: "/images/menu-dessert-bites.jpg",
+    img: assetPath("images/menu-dessert-bites.jpg"),
   },
 ];
 

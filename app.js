@@ -168,35 +168,41 @@
       unit: "box"
     }
   ];
+  const assetPath = (relativePath) => {
+    const cleanPath = relativePath.replace(/^\/+/, "");
+    const pathname = window.location.pathname || "/";
+    const basePath = pathname.endsWith("/") ? pathname : pathname.replace(/[^/]*$/, "");
+    return `${basePath}${cleanPath}`;
+  };
   const IMAGES = {
     // Hero background images (one per page — dark, moody food/event photography works best)
     hero: {
-      home: "/images/hero-home.jpg",
+      home: assetPath("images/hero-home.jpg"),
       // Signature croquettes plated beautifully
-      menu: "/images/hero-menu.jpg",
+      menu: assetPath("images/hero-menu.jpg"),
       // Overhead spread of dishes
-      services: "/images/hero-services.jpg",
+      services: assetPath("images/hero-services.jpg"),
       // Elegant event table setting
-      events: "/images/hero-events.jpg",
+      events: assetPath("images/hero-events.jpg"),
       // Candid shot from a catered event
-      reviews: "/images/hero-reviews.jpg",
+      reviews: assetPath("images/hero-reviews.jpg"),
       // Happy guests at a table
-      pricing: "/images/hero-pricing.jpg",
+      pricing: assetPath("images/hero-pricing.jpg"),
       // Close-up of plated food
-      about: "/images/hero-about.jpg",
+      about: assetPath("images/hero-about.jpg"),
       // Family/team in kitchen or at event
-      contact: "/images/hero-contact.jpg",
+      contact: assetPath("images/hero-contact.jpg"),
       // Warm, inviting table setup
-      areas: "/images/hero-areas.jpg"
+      areas: assetPath("images/hero-areas.jpg")
       // Philadelphia/SJ skyline or venue exterior
     },
     // About page photos
     about: {
-      family: "/images/about-family.jpg",
+      family: assetPath("images/about-family.jpg"),
       // Family photo or candid cooking shot
-      kitchen: "/images/about-kitchen.jpg",
+      kitchen: assetPath("images/about-kitchen.jpg"),
       // Kitchen prep / behind the scenes
-      team: "/images/about-team.jpg"
+      team: assetPath("images/about-team.jpg")
       // Team at an event
     },
     // Placeholder fallback (generated gradient when image fails to load)
@@ -211,7 +217,7 @@
       tags: ["Signature", "GF Option"],
       featured: true,
       icon: "\u{1F947}",
-      img: "/images/menu-croquettes-classic.jpg"
+      img: assetPath("images/menu-croquettes-classic.jpg")
     },
     {
       id: "croquettes-herb",
@@ -221,7 +227,7 @@
       tags: ["Signature", "Seasonal"],
       featured: true,
       icon: "\u{1F33F}",
-      img: "/images/menu-croquettes-herb.jpg"
+      img: assetPath("images/menu-croquettes-herb.jpg")
     },
     {
       id: "croquettes-spicy",
@@ -231,7 +237,7 @@
       tags: ["Signature", "Spicy"],
       featured: true,
       icon: "\u{1F336}\uFE0F",
-      img: "/images/menu-croquettes-spicy.jpg"
+      img: assetPath("images/menu-croquettes-spicy.jpg")
     },
     {
       id: "croquettes-truffle",
@@ -241,7 +247,7 @@
       tags: ["Premium", "Signature"],
       featured: true,
       icon: "\u{1F5A4}",
-      img: "/images/menu-croquettes-truffle.jpg"
+      img: assetPath("images/menu-croquettes-truffle.jpg")
     },
     {
       id: "mac-cheese",
@@ -251,7 +257,7 @@
       tags: ["Comfort Classic", "Vegetarian"],
       featured: false,
       icon: "\u{1F9C0}",
-      img: "/images/menu-mac-cheese.jpg"
+      img: assetPath("images/menu-mac-cheese.jpg")
     },
     {
       id: "collard-greens",
@@ -261,7 +267,7 @@
       tags: ["Southern", "GF"],
       featured: false,
       icon: "\u{1F96C}",
-      img: "/images/menu-collard-greens.jpg"
+      img: assetPath("images/menu-collard-greens.jpg")
     },
     {
       id: "sweet-potato",
@@ -271,7 +277,7 @@
       tags: ["Seasonal", "GF"],
       featured: false,
       icon: "\u{1F360}",
-      img: "/images/menu-sweet-potato.jpg"
+      img: assetPath("images/menu-sweet-potato.jpg")
     },
     {
       id: "cornbread",
@@ -281,7 +287,7 @@
       tags: ["House Made"],
       featured: false,
       icon: "\u{1F33D}",
-      img: "/images/menu-cornbread.jpg"
+      img: assetPath("images/menu-cornbread.jpg")
     },
     {
       id: "slaw",
@@ -291,7 +297,7 @@
       tags: ["Fresh", "Vegan", "GF"],
       featured: false,
       icon: "\u{1F957}",
-      img: "/images/menu-citrus-slaw.jpg"
+      img: assetPath("images/menu-citrus-slaw.jpg")
     },
     {
       id: "dipping-trio",
@@ -301,7 +307,7 @@
       tags: ["House Made"],
       featured: false,
       icon: "\u{1FAD9}",
-      img: "/images/menu-dipping-trio.jpg"
+      img: assetPath("images/menu-dipping-trio.jpg")
     },
     {
       id: "dessert-bites",
@@ -311,7 +317,7 @@
       tags: ["Dessert", "Seasonal"],
       featured: false,
       icon: "\u{1F36B}",
-      img: "/images/menu-dessert-bites.jpg"
+      img: assetPath("images/menu-dessert-bites.jpg")
     }
   ];
   const EVENTS = [
