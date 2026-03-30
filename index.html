@@ -130,9 +130,9 @@
   <script defer src="app.js"></script>
   <script>
     const el = document.getElementById('loading');
-    const root = document.getElementById('root');
+    const rootEl = document.getElementById('root');
     const markReady = () => {
-      if (!root.children.length) return false;
+      if (!rootEl || !rootEl.children.length) return false;
       if (!document.body.classList.contains('app-ready')) {
         document.body.classList.add('app-ready');
       }
@@ -147,7 +147,9 @@
       if (markReady()) observer.disconnect();
     });
 
-    observer.observe(root, { childList: true });
+    if (rootEl) {
+      observer.observe(rootEl, { childList: true });
+    }
 
     const check = () => {
       if (!markReady()) requestAnimationFrame(check);
