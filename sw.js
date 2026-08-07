@@ -1,4 +1,4 @@
-const CACHE_NAME = 'act-two-catering-v5';
+const CACHE_NAME = 'act-two-catering-v6';
 
 const PRECACHE_URLS = [
   '/',

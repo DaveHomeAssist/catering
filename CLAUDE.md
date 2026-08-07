@@ -28,9 +28,10 @@ Catering is a premium service site for Act Two Catering. It is a marketing and l
 
 | ID | Severity | Status | Title | Notes |
 |----|----------|--------|-------|-------|
-| 001 | P1 | open | Quote form does not submit to a real backend | Current form flow appears successful without actual lead delivery |
+| 001 | P1 | blocked | Deploy quote persistence backend | UI and function now fail closed and are covered by contract tests; production activation requires Netlify authentication plus a Notion integration shared to the canonical Leads database |
 | 002 | P2 | open | Navigation semantics need cleanup | Click only anchor patterns weaken accessibility and fallback behavior |
 
 ## Session Log
 
 [2026-03-18] [Catering] [docs] Add AGENTS baseline
+[2026-08-06] [Catering] [fix] Replace false quote success with validated Notion persistence contract and truthful failure UI; Netlify activation blocked on credentials

@@ -2,6 +2,11 @@
 
 Sourced from the `main` branch commit history (`git log --format="%ad|%s" --date=short --reverse`). Grouped by date.
 
+## 2026-08-06
+- Replace the quote form's unconditional mail-client success state with an authenticated backend response contract.
+- Validate contact and event fields, reject disallowed origins, add a honeypot, and map submissions to the canonical Notion Leads schema.
+- Add Node contract tests and a truthful direct-call/email fallback when persistence is unavailable.
+
 ## 2026-03-12
 - Initial project snapshot
 

@@ -13,6 +13,9 @@
     tagline: "A premium catering experience tailored for smaller gatherings, bringing restaurant-quality cuisine and exceptional service to clients throughout South Jersey."
   };
 
+  const QUOTE_ENDPOINT = "https://acttwocatering.netlify.app/.netlify/functions/quote";
+  const QUOTE_EVENT_TYPES = ["Wedding", "Corporate", "Private Party", "Birthday", "Holiday Event", "Other"];
+
   // ───────────────────────────────────────────────
   // SERVICE CATEGORIES — defined by event size + tone, not made-up specialties
   // ───────────────────────────────────────────────
@@ -568,6 +571,14 @@ textarea:focus-visible {
   color: white; transition: var(--transition); margin-left: auto;
 }
 .form-btn-next:hover { background: var(--wine-light); }
+.form-btn-next:disabled, .form-btn-back:disabled { cursor: wait; opacity: 0.65; }
+.form-error { color: var(--wine); font-size: 12px; margin-top: 6px; }
+.form-submit-error {
+  background: var(--wine-glow); border: 1px solid rgba(139,58,68,0.22); border-radius: var(--radius);
+  color: var(--charcoal); font-size: 13px; line-height: 1.55; margin-bottom: 18px; padding: 12px 14px;
+}
+.form-submit-error a { color: var(--wine); font-weight: 600; }
+.form-honeypot { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
 .form-success { text-align: center; padding: 48px 32px; }
 .form-success h3 { font-family: var(--font-display); font-size: 28px; color: var(--charcoal); margin: 16px 0 12px; }
 .form-success p { color: var(--slate); font-size: 14px; }
@@ -841,43 +852,73 @@ textarea:focus-visible {
   }
 
   // ───────────────────────────────────────────────
-  // QUOTE FORM — multi-step, mailto fallback (Phase 2 will wire backend)
+  // QUOTE FORM — multi-step, persisted to the canonical Notion Leads database
   // ───────────────────────────────────────────────
   function QuoteForm() {
     const [step, setStep] = useState(1);
     const [submitted, setSubmitted] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
+    const [errors, setErrors] = useState({});
+    const [submitError, setSubmitError] = useState("");
     const [form, setForm] = useState({
       eventType: "", guests: "", eventDate: "", location: "",
-      name: "", phone: "", email: "", details: ""
+      name: "", phone: "", email: "", details: "", website: ""
     });
     const totalSteps = 3;
-    const set = (k, v) => setForm((prev) => ({ ...prev, [k]: v }));
+    const set = (k, v) => {
+      setForm((prev) => ({ ...prev, [k]: v }));
+      setErrors((prev) => ({ ...prev, [k]: "" }));
+      setSubmitError("");
+    };
 
-    const handleSubmit = () => {
-      const lines = [
-        `Event type: ${form.eventType || "—"}`,
-        `Guests: ${form.guests || "—"}`,
-        `Date: ${form.eventDate || "—"}`,
-        `Location: ${form.location || "—"}`,
-        `Name: ${form.name || "—"}`,
-        `Phone: ${form.phone || "—"}`,
-        `Email: ${form.email || "—"}`,
-        ``,
-        `Details:`,
-        form.details || "(none)"
-      ].join("\n");
-      const subject = encodeURIComponent("Catering inquiry from acttwocatering.com");
-      const body = encodeURIComponent(lines);
-      window.location.href = `mailto:${BIZ.email}?subject=${subject}&body=${body}`;
-      setSubmitted(true);
+    const validate = () => {
+      const nextErrors = {};
+      const guestCount = form.guests === "" ? null : Number(form.guests);
+      if (!QUOTE_EVENT_TYPES.includes(form.eventType)) nextErrors.eventType = "Choose an event type.";
+      if (guestCount !== null && (!Number.isInteger(guestCount) || guestCount < 1 || guestCount > 10000)) {
+        nextErrors.guests = "Enter a guest count between 1 and 10,000.";
+      }
+      if (form.name.trim().length < 2) nextErrors.name = "Enter your full name.";
+      if (!form.phone.trim() && !form.email.trim()) nextErrors.contact = "Enter an email address or phone number.";
+      if (form.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
+        nextErrors.email = "Enter a valid email address.";
+      }
+      setErrors(nextErrors);
+      if (nextErrors.eventType || nextErrors.guests) setStep(1);
+      else if (nextErrors.name || nextErrors.contact || nextErrors.email) setStep(2);
+      return Object.keys(nextErrors).length === 0;
+    };
+
+    const handleSubmit = async () => {
+      if (submitting || !validate()) return;
+      setSubmitting(true);
+      setSubmitError("");
+      const controller = new AbortController();
+      const timeout = window.setTimeout(() => controller.abort(), 12000);
+      try {
+        const response = await fetch(QUOTE_ENDPOINT, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(form),
+          signal: controller.signal
+        });
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok || result.ok !== true) throw new Error(result.error || "Quote service unavailable");
+        setSubmitted(true);
+      } catch {
+        setSubmitError("We couldn't send your inquiry. Please call or email us directly.");
+      } finally {
+        window.clearTimeout(timeout);
+        setSubmitting(false);
+      }
     };
 
     if (submitted) {
       return React.createElement("div", { className: "quote-form-container" },
-        React.createElement("div", { className: "form-success" },
-          React.createElement("div", { style: { fontSize: 48 } }, "✉️"),
-          React.createElement("h3", null, "Inquiry sent"),
-          React.createElement("p", null, "Your email client should be opening now. If it didn't, call or email us directly."),
+        React.createElement("div", { className: "form-success", role: "status" },
+          React.createElement("div", { style: { fontSize: 48 }, "aria-hidden": "true" }, "✓"),
+          React.createElement("h3", null, "Inquiry received"),
+          React.createElement("p", null, "Thanks — your inquiry has been saved. We'll be in touch shortly."),
           React.createElement("p", { style: { marginTop: 12 } },
             React.createElement("a", { href: BIZ.phoneTel, style: { color: "var(--wine)", fontWeight: 600 } }, BIZ.phone)
           )
@@ -901,20 +942,23 @@ textarea:focus-visible {
             React.createElement("label", { className: "form-label", htmlFor: "qf-type" }, "Event type"),
             React.createElement("select", {
               id: "qf-type", className: "form-select",
-              value: form.eventType, onChange: (e) => set("eventType", e.target.value)
+              value: form.eventType, onChange: (e) => set("eventType", e.target.value),
+              required: true, "aria-invalid": Boolean(errors.eventType), "aria-describedby": errors.eventType ? "qf-type-error" : undefined
             },
               React.createElement("option", { value: "" }, "Select an event type…"),
-              SERVICE_CATEGORIES.map((c) => React.createElement("option", { key: c.id, value: c.title }, c.title)),
-              React.createElement("option", { value: "Other" }, "Other / not sure yet")
-            )
+              QUOTE_EVENT_TYPES.map((eventType) => React.createElement("option", { key: eventType, value: eventType }, eventType))
+            ),
+            errors.eventType ? React.createElement("div", { id: "qf-type-error", className: "form-error" }, errors.eventType) : null
           ),
           React.createElement("div", { className: "form-row" },
             React.createElement("div", { className: "form-field" },
               React.createElement("label", { className: "form-label", htmlFor: "qf-guests" }, "Estimated guest count"),
               React.createElement("input", {
                 id: "qf-guests", className: "form-input", type: "number", inputMode: "numeric",
-                placeholder: "e.g. 24", value: form.guests, onChange: (e) => set("guests", e.target.value)
-              })
+                min: "1", max: "10000", placeholder: "e.g. 24", value: form.guests, onChange: (e) => set("guests", e.target.value),
+                "aria-invalid": Boolean(errors.guests), "aria-describedby": errors.guests ? "qf-guests-error" : undefined
+              }),
+              errors.guests ? React.createElement("div", { id: "qf-guests-error", className: "form-error" }, errors.guests) : null
             ),
             React.createElement("div", { className: "form-field" },
               React.createElement("label", { className: "form-label", htmlFor: "qf-date" }, "Event date"),
@@ -938,24 +982,32 @@ textarea:focus-visible {
             React.createElement("label", { className: "form-label", htmlFor: "qf-name" }, "Full name *"),
             React.createElement("input", {
               id: "qf-name", className: "form-input",
-              value: form.name, onChange: (e) => set("name", e.target.value), required: true
-            })
+              value: form.name, onChange: (e) => set("name", e.target.value), required: true,
+              autoComplete: "name", "aria-invalid": Boolean(errors.name), "aria-describedby": errors.name ? "qf-name-error" : undefined
+            }),
+            errors.name ? React.createElement("div", { id: "qf-name-error", className: "form-error" }, errors.name) : null
           ),
           React.createElement("div", { className: "form-row" },
             React.createElement("div", { className: "form-field" },
-              React.createElement("label", { className: "form-label", htmlFor: "qf-phone" }, "Phone *"),
+              React.createElement("label", { className: "form-label", htmlFor: "qf-phone" }, "Phone"),
               React.createElement("input", {
                 id: "qf-phone", className: "form-input", type: "tel", inputMode: "tel",
-                value: form.phone, onChange: (e) => set("phone", e.target.value), required: true
+                value: form.phone, onChange: (e) => set("phone", e.target.value), autoComplete: "tel",
+                "aria-invalid": Boolean(errors.contact), "aria-describedby": errors.contact ? "qf-contact-error" : undefined
               })
             ),
             React.createElement("div", { className: "form-field" },
-              React.createElement("label", { className: "form-label", htmlFor: "qf-email" }, "Email *"),
+              React.createElement("label", { className: "form-label", htmlFor: "qf-email" }, "Email"),
               React.createElement("input", {
                 id: "qf-email", className: "form-input", type: "email", inputMode: "email",
-                value: form.email, onChange: (e) => set("email", e.target.value), required: true
+                value: form.email, onChange: (e) => set("email", e.target.value), autoComplete: "email",
+                "aria-invalid": Boolean(errors.contact || errors.email),
+                "aria-describedby": errors.email ? "qf-email-error" : errors.contact ? "qf-contact-error" : undefined
               })
-            )
+            ),
+            errors.contact ? React.createElement("div", { id: "qf-contact-error", className: "form-error" }, errors.contact) : null,
+            errors.email ? React.createElement("div", { id: "qf-email-error", className: "form-error" }, errors.email) : null,
+            React.createElement("div", { style: { fontSize: 12, color: "var(--slate)", marginTop: -8 } }, "Please provide at least one way to reach you.")
           )
         ),
         step === 3 && React.createElement(React.Fragment, null,
@@ -964,15 +1016,24 @@ textarea:focus-visible {
             React.createElement("textarea", {
               id: "qf-details", className: "form-textarea", style: { minHeight: 120 },
               placeholder: "What's the occasion? Any dietary needs? Vision for the food? The more you share, the better we can plan…",
-              value: form.details, onChange: (e) => set("details", e.target.value)
+              value: form.details, onChange: (e) => set("details", e.target.value), maxLength: 5000
             })
+          ),
+          React.createElement("div", { className: "form-honeypot", "aria-hidden": "true" },
+            React.createElement("label", { htmlFor: "qf-website" }, "Website"),
+            React.createElement("input", { id: "qf-website", tabIndex: -1, autoComplete: "off", value: form.website, onChange: (e) => set("website", e.target.value) })
           )
         ),
+        submitError ? React.createElement("div", { className: "form-submit-error", role: "alert" },
+          submitError, " ",
+          React.createElement("a", { href: `mailto:${BIZ.email}` }, BIZ.email), " or ",
+          React.createElement("a", { href: BIZ.phoneTel }, BIZ.phone), "."
+        ) : null,
         React.createElement("div", { className: "form-actions" },
-          step > 1 ? React.createElement("button", { className: "form-btn-back", onClick: () => setStep((s) => s - 1) }, "← Back") : null,
+          step > 1 ? React.createElement("button", { type: "button", className: "form-btn-back", disabled: submitting, onClick: () => setStep((s) => s - 1) }, "← Back") : null,
           step < totalSteps
-            ? React.createElement("button", { className: "form-btn-next", onClick: () => setStep((s) => s + 1) }, "Continue →")
-            : React.createElement("button", { className: "form-btn-next", onClick: handleSubmit }, "Send inquiry")
+            ? React.createElement("button", { type: "button", className: "form-btn-next", onClick: () => setStep((s) => s + 1) }, "Continue →")
+            : React.createElement("button", { type: "button", className: "form-btn-next", disabled: submitting, onClick: handleSubmit }, submitting ? "Sending…" : "Send inquiry")
         )
       )
     );

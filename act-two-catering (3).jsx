@@ -13,6 +13,9 @@ const BIZ = {
   tagline: "A premium catering experience tailored for smaller gatherings, bringing restaurant-quality cuisine and exceptional service to clients throughout South Jersey.",
 };
 
+const QUOTE_ENDPOINT = "https://acttwocatering.netlify.app/.netlify/functions/quote";
+const QUOTE_EVENT_TYPES = ["Wedding", "Corporate", "Private Party", "Birthday", "Holiday Event", "Other"];
+
 const SERVICE_CATEGORIES = [
   {
     id: "intimate",
@@ -271,39 +274,69 @@ function FAQAccordion({ faqs }) {
 function QuoteForm() {
   const [step, setStep] = useState(1);
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [errors, setErrors] = useState({});
+  const [submitError, setSubmitError] = useState("");
   const [form, setForm] = useState({
     eventType: "", guests: "", eventDate: "", location: "",
-    name: "", phone: "", email: "", details: "",
+    name: "", phone: "", email: "", details: "", website: "",
   });
   const totalSteps = 3;
-  const set = (k, v) => setForm((prev) => ({ ...prev, [k]: v }));
+  const set = (k, v) => {
+    setForm((prev) => ({ ...prev, [k]: v }));
+    setErrors((prev) => ({ ...prev, [k]: "" }));
+    setSubmitError("");
+  };
 
-  const handleSubmit = () => {
-    const lines = [
-      `Event type: ${form.eventType || "—"}`,
-      `Guests: ${form.guests || "—"}`,
-      `Date: ${form.eventDate || "—"}`,
-      `Location: ${form.location || "—"}`,
-      `Name: ${form.name || "—"}`,
-      `Phone: ${form.phone || "—"}`,
-      `Email: ${form.email || "—"}`,
-      ``,
-      `Details:`,
-      form.details || "(none)",
-    ].join("\n");
-    const subject = encodeURIComponent("Catering inquiry from acttwocatering.com");
-    const body = encodeURIComponent(lines);
-    window.location.href = `mailto:${BIZ.email}?subject=${subject}&body=${body}`;
-    setSubmitted(true);
+  const validate = () => {
+    const nextErrors = {};
+    const guestCount = form.guests === "" ? null : Number(form.guests);
+    if (!QUOTE_EVENT_TYPES.includes(form.eventType)) nextErrors.eventType = "Choose an event type.";
+    if (guestCount !== null && (!Number.isInteger(guestCount) || guestCount < 1 || guestCount > 10000)) {
+      nextErrors.guests = "Enter a guest count between 1 and 10,000.";
+    }
+    if (form.name.trim().length < 2) nextErrors.name = "Enter your full name.";
+    if (!form.phone.trim() && !form.email.trim()) nextErrors.contact = "Enter an email address or phone number.";
+    if (form.email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
+      nextErrors.email = "Enter a valid email address.";
+    }
+    setErrors(nextErrors);
+    if (nextErrors.eventType || nextErrors.guests) setStep(1);
+    else if (nextErrors.name || nextErrors.contact || nextErrors.email) setStep(2);
+    return Object.keys(nextErrors).length === 0;
+  };
+
+  const handleSubmit = async () => {
+    if (submitting || !validate()) return;
+    setSubmitting(true);
+    setSubmitError("");
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), 12000);
+    try {
+      const response = await fetch(QUOTE_ENDPOINT, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+        signal: controller.signal,
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok || result.ok !== true) throw new Error(result.error || "Quote service unavailable");
+      setSubmitted(true);
+    } catch {
+      setSubmitError("We couldn't send your inquiry. Please call or email us directly.");
+    } finally {
+      window.clearTimeout(timeout);
+      setSubmitting(false);
+    }
   };
 
   if (submitted) {
     return (
       <div className="quote-form-container">
-        <div className="form-success">
-          <div style={{ fontSize: 48 }}>✉️</div>
-          <h3>Inquiry sent</h3>
-          <p>Your email client should be opening now. If it didn't, call or email us directly.</p>
+        <div className="form-success" role="status">
+          <div style={{ fontSize: 48 }} aria-hidden="true">✓</div>
+          <h3>Inquiry received</h3>
+          <p>Thanks — your inquiry has been saved. We'll be in touch shortly.</p>
           <p style={{ marginTop: 12 }}>
             <a href={BIZ.phoneTel} style={{ color: "var(--wine)", fontWeight: 600 }}>{BIZ.phone}</a>
           </p>
@@ -328,17 +361,20 @@ function QuoteForm() {
           <>
             <div className="form-field">
               <label className="form-label" htmlFor="qf-type">Event type</label>
-              <select id="qf-type" className="form-select" value={form.eventType} onChange={(e) => set("eventType", e.target.value)}>
+              <select id="qf-type" className="form-select" value={form.eventType} onChange={(e) => set("eventType", e.target.value)}
+                required aria-invalid={Boolean(errors.eventType)} aria-describedby={errors.eventType ? "qf-type-error" : undefined}>
                 <option value="">Select an event type…</option>
-                {SERVICE_CATEGORIES.map((c) => <option key={c.id} value={c.title}>{c.title}</option>)}
-                <option value="Other">Other / not sure yet</option>
+                {QUOTE_EVENT_TYPES.map((eventType) => <option key={eventType} value={eventType}>{eventType}</option>)}
               </select>
+              {errors.eventType && <div id="qf-type-error" className="form-error">{errors.eventType}</div>}
             </div>
             <div className="form-row">
               <div className="form-field">
                 <label className="form-label" htmlFor="qf-guests">Estimated guest count</label>
                 <input id="qf-guests" className="form-input" type="number" inputMode="numeric"
-                  placeholder="e.g. 24" value={form.guests} onChange={(e) => set("guests", e.target.value)} />
+                  min="1" max="10000" placeholder="e.g. 24" value={form.guests} onChange={(e) => set("guests", e.target.value)}
+                  aria-invalid={Boolean(errors.guests)} aria-describedby={errors.guests ? "qf-guests-error" : undefined} />
+                {errors.guests && <div id="qf-guests-error" className="form-error">{errors.guests}</div>}
               </div>
               <div className="form-field">
                 <label className="form-label" htmlFor="qf-date">Event date</label>
@@ -358,20 +394,28 @@ function QuoteForm() {
             <div className="form-field">
               <label className="form-label" htmlFor="qf-name">Full name *</label>
               <input id="qf-name" className="form-input"
-                value={form.name} onChange={(e) => set("name", e.target.value)} required />
+                value={form.name} onChange={(e) => set("name", e.target.value)} required autoComplete="name"
+                aria-invalid={Boolean(errors.name)} aria-describedby={errors.name ? "qf-name-error" : undefined} />
+              {errors.name && <div id="qf-name-error" className="form-error">{errors.name}</div>}
             </div>
             <div className="form-row">
               <div className="form-field">
-                <label className="form-label" htmlFor="qf-phone">Phone *</label>
+                <label className="form-label" htmlFor="qf-phone">Phone</label>
                 <input id="qf-phone" className="form-input" type="tel" inputMode="tel"
-                  value={form.phone} onChange={(e) => set("phone", e.target.value)} required />
+                  value={form.phone} onChange={(e) => set("phone", e.target.value)} autoComplete="tel"
+                  aria-invalid={Boolean(errors.contact)} aria-describedby={errors.contact ? "qf-contact-error" : undefined} />
               </div>
               <div className="form-field">
-                <label className="form-label" htmlFor="qf-email">Email *</label>
+                <label className="form-label" htmlFor="qf-email">Email</label>
                 <input id="qf-email" className="form-input" type="email" inputMode="email"
-                  value={form.email} onChange={(e) => set("email", e.target.value)} required />
+                  value={form.email} onChange={(e) => set("email", e.target.value)} autoComplete="email"
+                  aria-invalid={Boolean(errors.contact || errors.email)}
+                  aria-describedby={errors.email ? "qf-email-error" : errors.contact ? "qf-contact-error" : undefined} />
               </div>
             </div>
+            {errors.contact && <div id="qf-contact-error" className="form-error">{errors.contact}</div>}
+            {errors.email && <div id="qf-email-error" className="form-error">{errors.email}</div>}
+            <div style={{ fontSize: 12, color: "var(--slate)", marginTop: -8 }}>Please provide at least one way to reach you.</div>
           </>
         )}
         {step === 3 && (
@@ -379,14 +423,23 @@ function QuoteForm() {
             <label className="form-label" htmlFor="qf-details">Tell us about your event</label>
             <textarea id="qf-details" className="form-textarea" style={{ minHeight: 120 }}
               placeholder="What's the occasion? Any dietary needs? Vision for the food? The more you share, the better we can plan…"
-              value={form.details} onChange={(e) => set("details", e.target.value)} />
+              value={form.details} onChange={(e) => set("details", e.target.value)} maxLength={5000} />
+            <div className="form-honeypot" aria-hidden="true">
+              <label htmlFor="qf-website">Website</label>
+              <input id="qf-website" tabIndex={-1} autoComplete="off" value={form.website} onChange={(e) => set("website", e.target.value)} />
+            </div>
+          </div>
+        )}
+        {submitError && (
+          <div className="form-submit-error" role="alert">
+            {submitError} <a href={`mailto:${BIZ.email}`}>{BIZ.email}</a> or <a href={BIZ.phoneTel}>{BIZ.phone}</a>.
           </div>
         )}
         <div className="form-actions">
-          {step > 1 && <button className="form-btn-back" onClick={() => setStep((s) => s - 1)}>← Back</button>}
+          {step > 1 && <button type="button" className="form-btn-back" disabled={submitting} onClick={() => setStep((s) => s - 1)}>← Back</button>}
           {step < totalSteps
-            ? <button className="form-btn-next" onClick={() => setStep((s) => s + 1)}>Continue →</button>
-            : <button className="form-btn-next" onClick={handleSubmit}>Send inquiry</button>}
+            ? <button type="button" className="form-btn-next" onClick={() => setStep((s) => s + 1)}>Continue →</button>
+            : <button type="button" className="form-btn-next" disabled={submitting} onClick={handleSubmit}>{submitting ? "Sending…" : "Send inquiry"}</button>}
         </div>
       </div>
     </div>
